@@ -1,6 +1,6 @@
 # vadeval
 
-[![CI](https://github.com/<your-username>/vad-eval/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-username>/vad-eval/actions/workflows/ci.yml)
+[![CI](https://github.com/<catsday>/vad-eval/actions/workflows/ci.yml/badge.svg)](https://github.com/<catsday>/vad-eval/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 
@@ -24,7 +24,7 @@ Video Surveillance Systems*.
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/vad-eval.git
+git clone https://github.com/<catsday>/vad-eval.git
 cd vad-eval
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[plot]"          # users
@@ -75,6 +75,8 @@ print(ve.roc_auc(labels, scores), cal.threshold, cal.event_recall)
 
 ## Input format
 
+To evaluate a real detector, export one row per frame with its anomaly score and the ground-truth label.
+
 A CSV file with a header and one row per frame:
 
 ```
@@ -109,5 +111,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 If you use `vadeval` in research, please cite it using [CITATION.cff](CITATION.cff).
 
 ## License
+
 
 [MIT](LICENSE)
