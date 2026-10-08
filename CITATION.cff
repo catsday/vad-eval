@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "vadeval: evaluation toolkit for video anomaly detection"
+authors:
+  - family-names: "[Surname]"
+    given-names: "[Name]"
+version: 0.1.0
+date-released: 2026-10-07
+license: MIT
+repository-code: "https://github.com/<your-username>/vad-eval"
