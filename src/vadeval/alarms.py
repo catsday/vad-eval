@@ -23,11 +23,27 @@ def segments(mask: ArrayLike) -> list[tuple[int, int]]:
     return _runs(as_labels(mask))
 
 
-def false_alarms(pred: ArrayLike, truth: ArrayLike) -> int:
-    """Number of predicted segments that do not overlap any true segment."""
+def _dilate(mask: np.ndarray, frames: int) -> np.ndarray:
+    """Grow every positive run by ``frames`` on both sides."""
+    if frames <= 0:
+        return mask
+    kernel = np.ones(2 * frames + 1)
+    return np.convolve(mask.astype(np.float64), kernel, mode="same") > 0
+
+
+def false_alarms(pred: ArrayLike, truth: ArrayLike, tolerance: int = 0) -> int:
+    """Number of alarm segments that fall outside the true events.
+
+    Alarm frames within ``tolerance`` frames of a true event are not counted
+    (smoothing makes alarms start late and end late). Everything else is a
+    false alarm, so an "always alarm" detector is penalised between events
+    instead of being rewarded for overlapping them.
+    """
+    if tolerance < 0:
+        raise ValueError("tolerance must be >= 0")
     p = as_labels(pred)
     t = as_labels(truth, p.size)
-    return sum(1 for a, b in _runs(p) if not t[a:b].any())
+    return len(_runs(p & ~_dilate(t, tolerance)))
 
 
 def event_recall(pred: ArrayLike, truth: ArrayLike) -> float:
@@ -63,6 +79,7 @@ def calibrate_threshold(
     fps: float,
     max_false_alarms_per_shift: float = 2.0,
     min_frames: int = 1,
+    tolerance: int = 0,
     n_candidates: int = 200,
 ) -> Calibration:
     """Lowest threshold whose false-alarm rate fits the operator budget.
@@ -76,7 +93,7 @@ def calibrate_threshold(
     candidates = np.unique(np.quantile(s, np.linspace(0.0, 1.0, n_candidates)))
     for thr in candidates:  # ascending: first feasible = lowest feasible
         pred = binarize(s, float(thr), min_frames)
-        rate = false_alarms_per_hour(false_alarms(pred, y), s.size, fps) * SHIFT_HOURS
+        rate = false_alarms_per_hour(false_alarms(pred, y, tolerance), s.size, fps) * SHIFT_HOURS
         if rate <= max_false_alarms_per_shift:
             recall = event_recall(pred, y) if y.any() else float("nan")
             return Calibration(float(thr), float(rate), float(recall))
